@@ -1,0 +1,2 @@
+-- docker/postgres/init.sql
+-- TODO: Create table schema

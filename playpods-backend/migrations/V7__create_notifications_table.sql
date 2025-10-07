@@ -1,0 +1,2 @@
+-- migrations/V7__create_notifications_table.sql
+-- TODO: Create table schema

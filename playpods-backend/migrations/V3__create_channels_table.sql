@@ -1,0 +1,2 @@
+-- migrations/V3__create_channels_table.sql
+-- TODO: Create table schema

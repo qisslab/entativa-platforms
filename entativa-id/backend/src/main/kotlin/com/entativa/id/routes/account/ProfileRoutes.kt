@@ -1,0 +1,4 @@
+// backend/src/main/kotlin/com/entativa/id/routes/account/ProfileRoutes.kt
+package com.entativa.id
+
+// TODO: Implement Entativa ID feature

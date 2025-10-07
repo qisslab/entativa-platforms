@@ -1,0 +1,2 @@
+-- migrations/V20__create_indexes.sql
+-- TODO: Create table schema

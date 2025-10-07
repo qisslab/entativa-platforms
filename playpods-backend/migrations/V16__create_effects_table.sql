@@ -1,0 +1,2 @@
+-- migrations/V16__create_effects_table.sql
+-- TODO: Create table schema

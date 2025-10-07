@@ -1,0 +1,2 @@
+-- migrations/V18__create_captions_table.sql
+-- TODO: Create table schema

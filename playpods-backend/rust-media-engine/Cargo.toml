@@ -1,0 +1,9 @@
+[package]
+name = "playpods-media-engine"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# TODO: Add dependencies for video/audio processing
+tokio = { version = "1.0", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }

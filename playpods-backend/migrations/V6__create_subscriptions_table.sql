@@ -1,0 +1,2 @@
+-- migrations/V6__create_subscriptions_table.sql
+-- TODO: Create table schema

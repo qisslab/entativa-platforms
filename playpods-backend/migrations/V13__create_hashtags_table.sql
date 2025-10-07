@@ -1,0 +1,2 @@
+-- migrations/V13__create_hashtags_table.sql
+-- TODO: Create table schema

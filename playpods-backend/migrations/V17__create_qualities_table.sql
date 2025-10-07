@@ -1,0 +1,2 @@
+-- migrations/V17__create_qualities_table.sql
+-- TODO: Create table schema

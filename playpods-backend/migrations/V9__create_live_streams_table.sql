@@ -1,0 +1,2 @@
+-- migrations/V9__create_live_streams_table.sql
+-- TODO: Create table schema

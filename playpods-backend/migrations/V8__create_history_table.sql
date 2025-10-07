@@ -1,0 +1,2 @@
+-- migrations/V8__create_history_table.sql
+-- TODO: Create table schema

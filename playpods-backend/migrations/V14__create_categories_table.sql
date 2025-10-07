@@ -1,0 +1,2 @@
+-- migrations/V14__create_categories_table.sql
+-- TODO: Create table schema

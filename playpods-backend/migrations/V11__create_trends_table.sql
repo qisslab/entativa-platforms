@@ -1,0 +1,2 @@
+-- migrations/V11__create_trends_table.sql
+-- TODO: Create table schema

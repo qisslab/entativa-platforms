@@ -1,0 +1,2 @@
+-- migrations/V19__create_thumbnails_table.sql
+-- TODO: Create table schema

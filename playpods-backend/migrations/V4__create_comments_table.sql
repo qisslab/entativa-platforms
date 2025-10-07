@@ -1,0 +1,2 @@
+-- migrations/V4__create_comments_table.sql
+-- TODO: Create table schema

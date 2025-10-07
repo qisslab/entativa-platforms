@@ -1,0 +1,2 @@
+-- migrations/V12__create_analytics_table.sql
+-- TODO: Create table schema

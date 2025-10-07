@@ -1,0 +1,2 @@
+-- migrations/V2__create_pixels_table.sql
+-- TODO: Create table schema

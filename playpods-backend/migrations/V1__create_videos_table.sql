@@ -1,0 +1,2 @@
+-- migrations/V1__create_videos_table.sql
+-- TODO: Create table schema

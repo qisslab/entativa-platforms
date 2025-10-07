@@ -350,4 +350,96 @@ class PlayPodsGenerator:
             "shared/src/androidMain/kotlin/com/entativa/playpods/platform/VideoPlayer.android.kt",
             "shared/src/androidMain/kotlin/com/entativa/playpods/platform/CameraCapture.android.kt",
             "shared/src/androidMain/kotlin/com/entativa/playpods/platform/PictureInPicture.android.kt",
-            "shared/src/androidMain
+            "shared/src/androidMain/kotlin/com/entativa/playpods/platform/Notifications.android.kt",
+            
+            # iOS specific
+            "shared/src/iosMain/kotlin/com/entativa/playpods/platform/VideoPlayer.ios.kt",
+            "shared/src/iosMain/kotlin/com/entativa/playpods/platform/CameraCapture.ios.kt",
+            "shared/src/iosMain/kotlin/com/entativa/playpods/platform/PictureInPicture.ios.kt",
+            "shared/src/iosMain/kotlin/com/entativa/playpods/platform/Notifications.ios.kt",
+            
+            # Desktop specific
+            "shared/src/desktopMain/kotlin/com/entativa/playpods/platform/VideoPlayer.desktop.kt",
+            "shared/src/desktopMain/kotlin/com/entativa/playpods/platform/CameraCapture.desktop.kt",
+            "shared/src/desktopMain/kotlin/com/entativa/playpods/platform/PictureInPicture.desktop.kt",
+            
+            # Build files
+            "shared/build.gradle.kts",
+            
+            # App modules
+            "androidApp/build.gradle.kts",
+            "androidApp/src/main/AndroidManifest.xml",
+            "androidApp/src/main/kotlin/com/entativa/playpods/android/MainActivity.kt",
+            
+            "iosApp/iosApp/ContentView.swift",
+            "iosApp/iosApp/PlayPodsApp.swift",
+            "iosApp/iosApp/Info.plist",
+            
+            "desktopApp/build.gradle.kts",
+            "desktopApp/src/jvmMain/kotlin/com/entativa/playpods/desktop/main.kt"
+        ]
+        
+        # ============================================================
+        # ANDROID APP FILES
+        # ============================================================
+        android_files = [
+            "androidApp/src/main/res/values/strings.xml",
+            "androidApp/src/main/res/values/colors.xml",
+            "androidApp/src/main/res/values/themes.xml",
+            "androidApp/src/main/res/drawable/ic_launcher_background.xml",
+            "androidApp/src/main/res/drawable/ic_launcher_foreground.xml",
+            "androidApp/src/main/res/mipmap-hdpi/ic_launcher.png",
+            "androidApp/src/main/res/mipmap-mdpi/ic_launcher.png",
+            "androidApp/src/main/res/mipmap-xhdpi/ic_launcher.png",
+            "androidApp/src/main/res/mipmap-xxhdpi/ic_launcher.png",
+            "androidApp/src/main/res/mipmap-xxxhdpi/ic_launcher.png"
+        ]
+        
+        # ============================================================
+        # DESKTOP APP FILES
+        # ============================================================
+        desktop_files = [
+            "desktopApp/src/jvmMain/resources/icon.png"
+        ]
+        
+        # Create all files
+        print("Creating root files...")
+        self._create_files(root_files)
+        
+        print("Creating shared files...")
+        self._create_files(shared_files)
+        
+        print("Creating Android app files...")
+        self._create_files(android_files)
+        
+        print("Creating desktop app files...")
+        self._create_files(desktop_files)
+        
+        print(f"✅ PlayPods structure generated successfully at {self.base_path.resolve()}")
+        
+    def _create_files(self, files):
+        """Create files and directories"""
+        for file_path in files:
+            full_path = self.base_path / file_path
+            full_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            if not full_path.exists():
+                # Add appropriate content based on file type
+                if file_path.endswith('.kt'):
+                    content = f"// {file_path}\npackage com.entativa.playpods\n\n// TODO: Implement\n"
+                elif file_path.endswith('.swift'):
+                    content = f"// {file_path}\nimport SwiftUI\n\n// TODO: Implement\n"
+                elif file_path.endswith('.xml'):
+                    content = f"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!-- {file_path} -->\n<!-- TODO: Implement -->\n"
+                elif file_path.endswith('.gradle.kts'):
+                    content = f"// {file_path}\n// TODO: Configure build\n"
+                elif file_path.endswith('.md'):
+                    content = f"# {file_path}\n\nTODO: Add documentation\n"
+                else:
+                    content = f"# {file_path}\n# TODO: Implement\n"
+                
+                full_path.write_text(content)
+
+if __name__ == "__main__":
+    generator = PlayPodsGenerator()
+    generator.generate()

@@ -1,0 +1,2 @@
+-- migrations/V5__create_playlists_table.sql
+-- TODO: Create table schema
