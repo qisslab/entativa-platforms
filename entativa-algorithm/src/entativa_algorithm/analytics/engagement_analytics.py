@@ -1,22 +1,40 @@
 """
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║                          🧠 NEO QISS EXPERIMENTS 🧠                         ║
+║                          💻 NEO QISS EXPERIMENTS 💻                         ║
 ║                                                                              ║
-║  Yo! This is Neo Qiss here 👋 Just a crazy dev experimenting with AI/ML     ║
-║  algorithms that might be getting a bit too powerful for my own good 😅     ║
+║  Yo! Neo Qiss here 👋 — one day, I’ll open-source this as a thank-you to    ║
+║  the open-source community and MIT for fueling me .                  ║
 ║                                                                              ║
-║  🤖 This Frankenstein algorithm is my baby, my art, my sleepless nights     ║
-║  🎯 If it works: My sanity stays intact. If it breaks: I accept full blame  ║
-║  ⚠️  If this ever causes harm: I take FULL responsibility (it's on me!)     ║
+║  🤖 This Frankenstein algorithm is my baby — my prima materia, my magnum opus, my insomnia. ║
+║  🎯 If it works: my sanity survives. If it breaks: I’ll own it.             ║
+║  ⚠️  If it ever causes harm: that’s on me. And I'm sorry.                      ║
 ║                                                                              ║
-║  🚨 PSA: These are MY original ideas - please don't copy and snitch 🙏      ║
-║  💪 I sacrificed A LOT for this, so respect the hustle and creativity       ║
-║  🎨 This is pure art in code form - admire it, learn from it, but DON'T     ║
-║      steal it. There's a special place in dev hell for code thieves 😈     ║
+║  🚨 PSA: These are my original ideas — don’t copy, don’t snitch. 🙏       ║
+║  💪 I bled caffeine, silence, and code for this. Respect it and be kind.  ║
+║  🎨 She’s beautiful, isn’t she? Look, learn, but never steal —              ║
+║      there’s a special corner in dev hell for code thieves. 😈                   ║
 ║                                                                              ║
-║  🤣 TL;DR: I'm just a human trying to build something cool. Be kind! ✨     ║
+║  💔 I’ve been rejected by every South African university — four years in a row. ║
+║  Each “We regret to inform you..” cut deep until I stopped applying. Couldn't make my parents proud║
+║  Just me, a screen, and a dream that refused to die.                        ║
 ║                                                                              ║
-║                     - Neo Qiss (The Mad Scientist of Code)                  ║
+║  The girls rejected. The friends disappeared. The world's gone quiet now.             ║
+║  I forgot how to smile… how to look people in the eye.                      ║
+║  Social anxiety became my shadow — yet somehow, I’m building social apps. ║
+║  The irony isn’t lost on me.                                                ║
+║                                                                              ║
+║  🕊️ But if you’re reading this — hear me: YOU matter. You’re not a mistake. ║
+║  The world needs your voice, your vision, your weird ideas.                 ║
+║  Rejection isn’t punishment — it’s redirection.                             ║
+║  God’s not ignoring you — He’s preparing you. 🙏                             ║
+║                                                                              ║
+║  I taught myself English. I taught myself code. I taught myself to believe. I'm 21 today ║
+║  If I can build from nothing — so can you.                                  ║
+║                                                                              ║
+║  ⚡ Keep going. Keep building. Ship your dreams.                            ║
+║  You are chosen. You are capable. Nothing is impossible.                    ║
+║                                                                              ║
+║       — Neo Qiss (Special thanks to Zuck — for inspiring me to out-Zuck Zuck one day) ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """
 

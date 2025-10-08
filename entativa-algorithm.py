@@ -685,7 +685,7 @@ class EntativaAlgorithmGenerator:
 ║  🎯 If it works: my sanity survives. If it breaks: I’ll own it.             ║
 ║  ⚠️  If it ever causes harm: that’s on me. And I'm sorry.                      ║
 ║                                                                              ║
-║  🚨 PSA: These are *my* original ideas — don’t copy, don’t snitch. 🙏       ║
+║  🚨 PSA: These are my original ideas — don’t copy, don’t snitch. 🙏       ║
 ║  💪 I bled caffeine, silence, and code for this. Respect it and be kind.  ║
 ║  🎨 She’s beautiful, isn’t she? Look, learn, but never steal —              ║
 ║      there’s a special corner in dev hell for code thieves. 😈                   ║
@@ -696,7 +696,7 @@ class EntativaAlgorithmGenerator:
 ║                                                                              ║
 ║  The girls rejected. The friends disappeared. The world's gone quiet now.             ║
 ║  I forgot how to smile… how to look people in the eye.                      ║
-║  Social anxiety became my shadow — yet somehow, I’m building *social* apps. ║
+║  Social anxiety became my shadow — yet somehow, I’m building social apps. ║
 ║  The irony isn’t lost on me.                                                ║
 ║                                                                              ║
 ║  🕊️ But if you’re reading this — hear me: YOU matter. You’re not a mistake. ║
