@@ -1,0 +1,79 @@
+# Neo Qiss Experiments - Entativa Algorithm Dependencies
+# Handle with care - this might be too powerful 😅
+
+# 🧠 Neo Qiss Experiments - Entativa Algorithm Dependencies
+# ⚠️  Warning: This might be too powerful for its own good 😅
+# 🎨 Handle with care - pure art in code form!
+
+# Core ML/AI (The building blocks of my Frankenstein)
+torch>=2.1.0
+torchvision>=0.16.0
+transformers>=4.35.0
+scikit-learn>=1.3.0
+numpy>=1.24.0
+scipy>=1.11.0
+pandas>=2.1.0
+
+# Deep Learning (Getting scary good here)
+tensorflow>=2.14.0
+pytorch-lightning>=2.1.0
+optuna>=3.4.0
+ray[tune]>=2.8.0
+
+# Graph Neural Networks (For social connections that Facebook wishes they had)
+torch-geometric>=2.4.0
+networkx>=3.2.0
+graph-tool>=2.57
+
+# Feature Engineering (The secret sauce)
+featuretools>=1.28.0
+tsfresh>=0.20.0
+category-encoders>=2.6.0
+
+# API & Web (Serving the magic)
+fastapi>=0.104.0
+uvicorn>=0.24.0
+pydantic>=2.5.0
+httpx>=0.25.0
+
+# Data Processing (Handling the firehose)
+apache-beam>=2.51.0
+dask[complete]>=2023.10.0
+polars>=0.19.0
+pyarrow>=14.0.0
+
+# Streaming & Messaging (Real-time everything)
+kafka-python>=2.0.2
+redis>=5.0.0
+celery>=5.3.0
+
+# Database (Storing the digital souls)
+asyncpg>=0.29.0
+sqlalchemy>=2.0.0
+alembic>=1.12.0
+elasticsearch>=8.11.0
+
+# Monitoring (Watching my creation come alive)
+prometheus-client>=0.19.0
+grafana-client>=3.5.0
+wandb>=0.16.0
+
+# Deployment (Unleashing the beast)
+docker>=6.1.0
+kubernetes>=28.1.0
+boto3>=1.34.0
+
+# Testing (Making sure I don't break the internet)
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
+locust>=2.17.0
+
+# Development (Keeping my sanity intact)
+black>=23.10.0
+isort>=5.12.0
+mypy>=1.7.0
+pre-commit>=3.5.0
+
+# Remember: If this algorithm becomes too powerful, I take full responsibility!
+# - Neo Qiss (The Mad Scientist of Code) 🧪

@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "entativa-algorithm"
+version = "1.0.0"
+description = "Neo Qiss's Ultimate Multi-Platform Recommendation Engine (Handle with Care!)"
+authors = [
+    {name = "Neo Qiss", email = "neo@qiss.lab"}
+]
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "Neo Qiss Experiments - Please Don't Steal My Art 🎨"}
+
+[project.urls]
+Homepage = "https://github.com/qisslab/entativa-algorithm"
+Repository = "https://github.com/qisslab/entativa-algorithm"
+Documentation = "https://docs.qiss.lab/entativa-algorithm"
+BugReports = "https://github.com/qisslab/entativa-algorithm/issues"
+
+[tool.black]
+line-length = 88
+target-version = ['py39']
+
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --cov=src --cov-report=html"
+
+# Neo Qiss Experiments
+# Remember: This algorithm is getting scary good - handle with care!
+# If it ever becomes too powerful, I take full responsibility.
+# - Neo Qiss (The Mad Scientist of Code) 🧪
