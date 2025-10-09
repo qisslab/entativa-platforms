@@ -113,12 +113,12 @@ class VerificationService(
     }
     
     /**
-     * Check if handle is protected (celebrity/VIP/company)
+     * Check if handle is protected (celebrity/VIP/company) across all categories
      */
     suspend fun checkHandleProtection(handle: String): HandleProtectionResult {
         return withContext(Dispatchers.IO) {
             try {
-                logger.debug("🛡️ Checking handle protection: $handle")
+                logger.debug("🛡️ Checking handle protection across all categories: $handle")
                 
                 // Check cache first
                 val cached = cacheManager.getCachedData<HandleProtectionResult>("protection:$handle")
@@ -127,64 +127,69 @@ class VerificationService(
                 }
                 
                 val normalizedHandle = handle.lowercase().trim()
+                
+                // Check all specialized protection databases
                 val result = transaction {
-                    // Check exact match in protected handles
-                    val exactMatch = ProtectedHandlesTable.select { 
-                        ProtectedHandlesTable.handle eq normalizedHandle 
-                    }.singleOrNull()
                     
-                    if (exactMatch != null) {
-                        return@transaction HandleProtectionResult(
-                            isProtected = true,
-                            protectionType = ProtectionType.valueOf(exactMatch[ProtectedHandlesTable.type].uppercase()),
-                            category = exactMatch[ProtectedHandlesTable.category]?.let { 
-                                ProtectionCategory.valueOf(it.uppercase()) 
-                            },
-                            reason = "Handle is protected for ${exactMatch[ProtectedHandlesTable.name]}",
-                            suggestedAlternatives = generateAlternatives(handle),
-                            requiresVerification = true
-                        )
-                    }
+                    // 1. Check Entertainment Celebrities
+                    var protectionResult = checkEntertainmentCelebrities(normalizedHandle)
+                    if (protectionResult.isProtected) return@transaction protectionResult
                     
-                    // Check similarity with protected handles
-                    val allProtected = ProtectedHandlesTable.selectAll().toList()
+                    // 2. Check Music Celebrities
+                    protectionResult = checkMusicCelebrities(normalizedHandle)
+                    if (protectionResult.isProtected) return@transaction protectionResult
                     
-                    for (protected in allProtected) {
-                        val protectedHandle = protected[ProtectedHandlesTable.handle]
-                        val similarity = calculateSimilarity(normalizedHandle, protectedHandle)
-                        
-                        if (similarity >= SIMILARITY_THRESHOLD) {
-                            return@transaction HandleProtectionResult(
-                                isProtected = true,
-                                protectionType = ProtectionType.valueOf(protected[ProtectedHandlesTable.type].uppercase()),
-                                category = protected[ProtectedHandlesTable.category]?.let { 
-                                    ProtectionCategory.valueOf(it.uppercase()) 
-                                },
-                                reason = "Handle too similar to protected handle: $protectedHandle (${similarity}% similarity)",
-                                suggestedAlternatives = generateAlternatives(handle),
-                                requiresVerification = true,
-                                similarityScore = similarity
-                            )
-                        }
-                    }
+                    // 3. Check Sports Figures
+                    protectionResult = checkSportsFigures(normalizedHandle)
+                    if (protectionResult.isProtected) return@transaction protectionResult
                     
-                    // Check company names
-                    val companyMatch = CompanyRegistryTable.select {
-                        (CompanyRegistryTable.name eq handle) or 
-                        (CompanyRegistryTable.handle eq normalizedHandle) or
-                        (CompanyRegistryTable.aliases like "%$normalizedHandle%")
-                    }.singleOrNull()
+                    // 4. Check Digital Celebrities
+                    protectionResult = checkDigitalCelebrities(normalizedHandle)
+                    if (protectionResult.isProtected) return@transaction protectionResult
                     
-                    if (companyMatch != null) {
-                        return@transaction HandleProtectionResult(
-                            isProtected = true,
-                            protectionType = ProtectionType.COMPANY,
-                            category = ProtectionCategory.BUSINESS,
-                            reason = "Handle reserved for company: ${companyMatch[CompanyRegistryTable.name]}",
-                            suggestedAlternatives = generateAlternatives(handle),
-                            requiresVerification = true
-                        )
-                    }
+                    // 5. Check Political Figures
+                    protectionResult = checkPoliticalFigures(normalizedHandle)
+                    if (protectionResult.isProtected) return@transaction protectionResult
+                    
+                    // 6. Check Government Organizations
+                    protectionResult = checkGovernmentOrganizations(normalizedHandle)
+                    if (protectionResult.isProtected) return@transaction protectionResult
+                    
+                    // 7. Check Corporations
+                    protectionResult = checkCorporations(normalizedHandle)
+                    if (protectionResult.isProtected) return@transaction protectionResult
+                    
+                    // 8. Check Business Leaders
+                    protectionResult = checkBusinessLeaders(normalizedHandle)
+                    if (protectionResult.isProtected) return@transaction protectionResult
+                    
+                    // 9. Check Financial Institutions
+                    protectionResult = checkFinancialInstitutions(normalizedHandle)
+                    if (protectionResult.isProtected) return@transaction protectionResult
+                    
+                    // 10. Check Tech Companies
+                    protectionResult = checkTechCompanies(normalizedHandle)
+                    if (protectionResult.isProtected) return@transaction protectionResult
+                    
+                    // 11. Check Media Organizations
+                    protectionResult = checkMediaOrganizations(normalizedHandle)
+                    if (protectionResult.isProtected) return@transaction protectionResult
+                    
+                    // 12. Check Journalists
+                    protectionResult = checkJournalists(normalizedHandle)
+                    if (protectionResult.isProtected) return@transaction protectionResult
+                    
+                    // 13. Check Scientists
+                    protectionResult = checkScientists(normalizedHandle)
+                    if (protectionResult.isProtected) return@transaction protectionResult
+                    
+                    // 14. Check Academic Institutions
+                    protectionResult = checkAcademicInstitutions(normalizedHandle)
+                    if (protectionResult.isProtected) return@transaction protectionResult
+                    
+                    // 15. Check Legacy Protected Handles (backward compatibility)
+                    protectionResult = checkLegacyProtectedHandles(normalizedHandle)
+                    if (protectionResult.isProtected) return@transaction protectionResult
                     
                     // Handle is available
                     HandleProtectionResult(
@@ -214,6 +219,411 @@ class VerificationService(
                 )
             }
         }
+    }
+    
+    // ============== SPECIALIZED PROTECTION CHECKERS ==============
+    
+    private fun checkEntertainmentCelebrities(handle: String): HandleProtectionResult {
+        val exactMatch = EntertainmentCelebritiesTable.select { 
+            EntertainmentCelebritiesTable.handle eq handle 
+        }.singleOrNull()
+        
+        if (exactMatch != null) {
+            return HandleProtectionResult(
+                isProtected = true,
+                protectionType = ProtectionType.CELEBRITY,
+                category = ProtectionCategory.ENTERTAINMENT,
+                reason = "Handle is protected for ${exactMatch[EntertainmentCelebritiesTable.fullName]} (${exactMatch[EntertainmentCelebritiesTable.category]})",
+                suggestedAlternatives = generateAlternatives(handle),
+                requiresVerification = true
+            )
+        }
+        
+        // Check similarity
+        val allCelebrities = EntertainmentCelebritiesTable.selectAll().toList()
+        for (celebrity in allCelebrities) {
+            val protectedHandle = celebrity[EntertainmentCelebritiesTable.handle]
+            val similarity = calculateSimilarity(handle, protectedHandle)
+            
+            if (similarity >= SIMILARITY_THRESHOLD) {
+                return HandleProtectionResult(
+                    isProtected = true,
+                    protectionType = ProtectionType.CELEBRITY,
+                    category = ProtectionCategory.ENTERTAINMENT,
+                    reason = "Handle too similar to ${celebrity[EntertainmentCelebritiesTable.fullName]} (${similarity}% similarity)",
+                    suggestedAlternatives = generateAlternatives(handle),
+                    requiresVerification = true,
+                    similarityScore = similarity
+                )
+            }
+            
+            // Check aliases
+            val aliases = celebrity[EntertainmentCelebritiesTable.aliases]
+            if (aliases.any { calculateSimilarity(handle, it) >= SIMILARITY_THRESHOLD }) {
+                return HandleProtectionResult(
+                    isProtected = true,
+                    protectionType = ProtectionType.CELEBRITY,
+                    category = ProtectionCategory.ENTERTAINMENT,
+                    reason = "Handle similar to alias of ${celebrity[EntertainmentCelebritiesTable.fullName]}",
+                    suggestedAlternatives = generateAlternatives(handle),
+                    requiresVerification = true
+                )
+            }
+        }
+        
+        return createNotProtectedResult()
+    }
+    
+    private fun checkMusicCelebrities(handle: String): HandleProtectionResult {
+        val exactMatch = MusicCelebritiesTable.select { 
+            MusicCelebritiesTable.handle eq handle 
+        }.singleOrNull()
+        
+        if (exactMatch != null) {
+            val monthlyListeners = exactMatch[MusicCelebritiesTable.monthlyListeners]
+            val listenerText = if (monthlyListeners > 0) " (${monthlyListeners/1000000}M monthly listeners)" else ""
+            
+            return HandleProtectionResult(
+                isProtected = true,
+                protectionType = ProtectionType.CELEBRITY,
+                category = ProtectionCategory.MUSIC,
+                reason = "Handle is protected for ${exactMatch[MusicCelebritiesTable.fullName]}$listenerText",
+                suggestedAlternatives = generateAlternatives(handle),
+                requiresVerification = true
+            )
+        }
+        
+        // Check similarity with music celebrities
+        val allMusicCelebrities = MusicCelebritiesTable.selectAll().toList()
+        for (celebrity in allMusicCelebrities) {
+            val protectedHandle = celebrity[MusicCelebritiesTable.handle]
+            val similarity = calculateSimilarity(handle, protectedHandle)
+            
+            if (similarity >= SIMILARITY_THRESHOLD) {
+                return HandleProtectionResult(
+                    isProtected = true,
+                    protectionType = ProtectionType.CELEBRITY,
+                    category = ProtectionCategory.MUSIC,
+                    reason = "Handle too similar to music artist ${celebrity[MusicCelebritiesTable.fullName]} (${similarity}% similarity)",
+                    suggestedAlternatives = generateAlternatives(handle),
+                    requiresVerification = true,
+                    similarityScore = similarity
+                )
+            }
+        }
+        
+        return createNotProtectedResult()
+    }
+    
+    private fun checkSportsFigures(handle: String): HandleProtectionResult {
+        val exactMatch = SportsFiguresTable.select { 
+            SportsFiguresTable.handle eq handle 
+        }.singleOrNull()
+        
+        if (exactMatch != null) {
+            return HandleProtectionResult(
+                isProtected = true,
+                protectionType = ProtectionType.CELEBRITY,
+                category = ProtectionCategory.SPORTS,
+                reason = "Handle is protected for ${exactMatch[SportsFiguresTable.fullName]} (${exactMatch[SportsFiguresTable.sport]})",
+                suggestedAlternatives = generateAlternatives(handle),
+                requiresVerification = true
+            )
+        }
+        
+        // Check similarity with sports figures
+        val allSportsFigures = SportsFiguresTable.selectAll().toList()
+        for (athlete in allSportsFigures) {
+            val protectedHandle = athlete[SportsFiguresTable.handle]
+            val similarity = calculateSimilarity(handle, protectedHandle)
+            
+            if (similarity >= SIMILARITY_THRESHOLD) {
+                return HandleProtectionResult(
+                    isProtected = true,
+                    protectionType = ProtectionType.CELEBRITY,
+                    category = ProtectionCategory.SPORTS,
+                    reason = "Handle too similar to ${athlete[SportsFiguresTable.sport]} star ${athlete[SportsFiguresTable.fullName]} (${similarity}% similarity)",
+                    suggestedAlternatives = generateAlternatives(handle),
+                    requiresVerification = true,
+                    similarityScore = similarity
+                )
+            }
+        }
+        
+        return createNotProtectedResult()
+    }
+    
+    private fun checkDigitalCelebrities(handle: String): HandleProtectionResult {
+        val exactMatch = DigitalCelebritiesTable.select { 
+            DigitalCelebritiesTable.handle eq handle 
+        }.singleOrNull()
+        
+        if (exactMatch != null) {
+            return HandleProtectionResult(
+                isProtected = true,
+                protectionType = ProtectionType.CELEBRITY,
+                category = ProtectionCategory.DIGITAL,
+                reason = "Handle is protected for ${exactMatch[DigitalCelebritiesTable.fullName]} (${exactMatch[DigitalCelebritiesTable.category]})",
+                suggestedAlternatives = generateAlternatives(handle),
+                requiresVerification = true
+            )
+        }
+        
+        return createNotProtectedResult()
+    }
+    
+    private fun checkPoliticalFigures(handle: String): HandleProtectionResult {
+        val exactMatch = PoliticalFiguresTable.select { 
+            PoliticalFiguresTable.handle eq handle 
+        }.singleOrNull()
+        
+        if (exactMatch != null) {
+            return HandleProtectionResult(
+                isProtected = true,
+                protectionType = ProtectionType.POLITICAL,
+                category = ProtectionCategory.GOVERNMENT,
+                reason = "Handle is protected for ${exactMatch[PoliticalFiguresTable.title]} ${exactMatch[PoliticalFiguresTable.fullName]}",
+                suggestedAlternatives = generateAlternatives(handle),
+                requiresVerification = true
+            )
+        }
+        
+        return createNotProtectedResult()
+    }
+    
+    private fun checkGovernmentOrganizations(handle: String): HandleProtectionResult {
+        val exactMatch = GovernmentOrganizationsTable.select { 
+            GovernmentOrganizationsTable.handle eq handle 
+        }.singleOrNull()
+        
+        if (exactMatch != null) {
+            return HandleProtectionResult(
+                isProtected = true,
+                protectionType = ProtectionType.GOVERNMENT,
+                category = ProtectionCategory.GOVERNMENT,
+                reason = "Handle is protected for government organization ${exactMatch[GovernmentOrganizationsTable.organizationName]}",
+                suggestedAlternatives = generateAlternatives(handle),
+                requiresVerification = true
+            )
+        }
+        
+        return createNotProtectedResult()
+    }
+    
+    private fun checkCorporations(handle: String): HandleProtectionResult {
+        val exactMatch = CorporationsTable.select { 
+            CorporationsTable.handle eq handle 
+        }.singleOrNull()
+        
+        if (exactMatch != null) {
+            val marketCap = exactMatch[CorporationsTable.marketCapBillions]
+            val marketCapText = if (marketCap > 0) " ($${marketCap}B market cap)" else ""
+            
+            return HandleProtectionResult(
+                isProtected = true,
+                protectionType = ProtectionType.COMPANY,
+                category = ProtectionCategory.BUSINESS,
+                reason = "Handle is protected for ${exactMatch[CorporationsTable.companyName]}$marketCapText",
+                suggestedAlternatives = generateAlternatives(handle),
+                requiresVerification = true
+            )
+        }
+        
+        // Check aliases and brands
+        val allCorporations = CorporationsTable.selectAll().toList()
+        for (corp in allCorporations) {
+            val aliases = corp[CorporationsTable.aliases]
+            if (aliases.any { calculateSimilarity(handle, it) >= SIMILARITY_THRESHOLD }) {
+                return HandleProtectionResult(
+                    isProtected = true,
+                    protectionType = ProtectionType.COMPANY,
+                    category = ProtectionCategory.BUSINESS,
+                    reason = "Handle similar to brand/alias of ${corp[CorporationsTable.companyName]}",
+                    suggestedAlternatives = generateAlternatives(handle),
+                    requiresVerification = true
+                )
+            }
+        }
+        
+        return createNotProtectedResult()
+    }
+    
+    private fun checkBusinessLeaders(handle: String): HandleProtectionResult {
+        val exactMatch = BusinessLeadersTable.select { 
+            BusinessLeadersTable.handle eq handle 
+        }.singleOrNull()
+        
+        if (exactMatch != null) {
+            val netWorth = exactMatch[BusinessLeadersTable.netWorthBillions]
+            val wealthText = if (netWorth > 0) " ($${netWorth}B net worth)" else ""
+            
+            return HandleProtectionResult(
+                isProtected = true,
+                protectionType = ProtectionType.BUSINESS_LEADER,
+                category = ProtectionCategory.BUSINESS,
+                reason = "Handle is protected for ${exactMatch[BusinessLeadersTable.fullName]}$wealthText",
+                suggestedAlternatives = generateAlternatives(handle),
+                requiresVerification = true
+            )
+        }
+        
+        return createNotProtectedResult()
+    }
+    
+    private fun checkFinancialInstitutions(handle: String): HandleProtectionResult {
+        val exactMatch = FinancialInstitutionsTable.select { 
+            FinancialInstitutionsTable.handle eq handle 
+        }.singleOrNull()
+        
+        if (exactMatch != null) {
+            return HandleProtectionResult(
+                isProtected = true,
+                protectionType = ProtectionType.FINANCIAL,
+                category = ProtectionCategory.BUSINESS,
+                reason = "Handle is protected for financial institution ${exactMatch[FinancialInstitutionsTable.institutionName]}",
+                suggestedAlternatives = generateAlternatives(handle),
+                requiresVerification = true
+            )
+        }
+        
+        return createNotProtectedResult()
+    }
+    
+    private fun checkTechCompanies(handle: String): HandleProtectionResult {
+        val exactMatch = TechCompaniesTable.select { 
+            TechCompaniesTable.handle eq handle 
+        }.singleOrNull()
+        
+        if (exactMatch != null) {
+            val valuation = exactMatch[TechCompaniesTable.valuationBillions]
+            val valuationText = if (valuation > 0) " ($${valuation}B valuation)" else ""
+            
+            return HandleProtectionResult(
+                isProtected = true,
+                protectionType = ProtectionType.TECH_COMPANY,
+                category = ProtectionCategory.BUSINESS,
+                reason = "Handle is protected for tech company ${exactMatch[TechCompaniesTable.companyName]}$valuationText",
+                suggestedAlternatives = generateAlternatives(handle),
+                requiresVerification = true
+            )
+        }
+        
+        return createNotProtectedResult()
+    }
+    
+    private fun checkMediaOrganizations(handle: String): HandleProtectionResult {
+        val exactMatch = MediaOrganizationsTable.select { 
+            MediaOrganizationsTable.handle eq handle 
+        }.singleOrNull()
+        
+        if (exactMatch != null) {
+            return HandleProtectionResult(
+                isProtected = true,
+                protectionType = ProtectionType.MEDIA,
+                category = ProtectionCategory.MEDIA,
+                reason = "Handle is protected for media organization ${exactMatch[MediaOrganizationsTable.organizationName]}",
+                suggestedAlternatives = generateAlternatives(handle),
+                requiresVerification = true
+            )
+        }
+        
+        return createNotProtectedResult()
+    }
+    
+    private fun checkJournalists(handle: String): HandleProtectionResult {
+        val exactMatch = JournalistsTable.select { 
+            JournalistsTable.handle eq handle 
+        }.singleOrNull()
+        
+        if (exactMatch != null) {
+            return HandleProtectionResult(
+                isProtected = true,
+                protectionType = ProtectionType.MEDIA,
+                category = ProtectionCategory.MEDIA,
+                reason = "Handle is protected for journalist ${exactMatch[JournalistsTable.fullName]} (${exactMatch[JournalistsTable.currentEmployer]})",
+                suggestedAlternatives = generateAlternatives(handle),
+                requiresVerification = true
+            )
+        }
+        
+        return createNotProtectedResult()
+    }
+    
+    private fun checkScientists(handle: String): HandleProtectionResult {
+        val exactMatch = ScientistsTable.select { 
+            ScientistsTable.handle eq handle 
+        }.singleOrNull()
+        
+        if (exactMatch != null) {
+            val nobelYear = exactMatch[ScientistsTable.nobelPrizeYear]
+            val nobelText = if (nobelYear != null) " (Nobel Prize $nobelYear)" else ""
+            
+            return HandleProtectionResult(
+                isProtected = true,
+                protectionType = ProtectionType.ACADEMIC,
+                category = ProtectionCategory.ACADEMIC,
+                reason = "Handle is protected for scientist ${exactMatch[ScientistsTable.fullName]}$nobelText",
+                suggestedAlternatives = generateAlternatives(handle),
+                requiresVerification = true
+            )
+        }
+        
+        return createNotProtectedResult()
+    }
+    
+    private fun checkAcademicInstitutions(handle: String): HandleProtectionResult {
+        val exactMatch = AcademicInstitutionsTable.select { 
+            AcademicInstitutionsTable.handle eq handle 
+        }.singleOrNull()
+        
+        if (exactMatch != null) {
+            val ranking = exactMatch[AcademicInstitutionsTable.rankingUs]
+            val rankingText = if (ranking != null && ranking > 0) " (Ranked #$ranking)" else ""
+            
+            return HandleProtectionResult(
+                isProtected = true,
+                protectionType = ProtectionType.ACADEMIC,
+                category = ProtectionCategory.ACADEMIC,
+                reason = "Handle is protected for ${exactMatch[AcademicInstitutionsTable.institutionName]}$rankingText",
+                suggestedAlternatives = generateAlternatives(handle),
+                requiresVerification = true
+            )
+        }
+        
+        return createNotProtectedResult()
+    }
+    
+    private fun checkLegacyProtectedHandles(handle: String): HandleProtectionResult {
+        // Check legacy protected handles table for backward compatibility
+        val exactMatch = ProtectedHandlesTable.select { 
+            ProtectedHandlesTable.handle eq handle 
+        }.singleOrNull()
+        
+        if (exactMatch != null) {
+            return HandleProtectionResult(
+                isProtected = true,
+                protectionType = ProtectionType.valueOf(exactMatch[ProtectedHandlesTable.type].uppercase()),
+                category = exactMatch[ProtectedHandlesTable.category]?.let { 
+                    ProtectionCategory.valueOf(it.uppercase()) 
+                },
+                reason = "Handle is protected for ${exactMatch[ProtectedHandlesTable.name]}",
+                suggestedAlternatives = generateAlternatives(handle),
+                requiresVerification = true
+            )
+        }
+        
+        return createNotProtectedResult()
+    }
+    
+    private fun createNotProtectedResult(): HandleProtectionResult {
+        return HandleProtectionResult(
+            isProtected = false,
+            protectionType = null,
+            category = null,
+            reason = null,
+            suggestedAlternatives = emptyList(),
+            requiresVerification = false
+        )
     }
     
     /**

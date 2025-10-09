@@ -325,3 +325,341 @@ object PlatformAccountsTable : UUIDTable("platform_accounts") {
         uniqueIndex(platform, platformUserId)
     }
 }
+
+// ============== CATEGORIZED PROTECTION TABLES ==============
+
+// Entertainment Celebrities
+object EntertainmentCelebritiesTable : UUIDTable("protected_entertainment_celebrities") {
+    val fullName = varchar("full_name", 255)
+    val handle = varchar("handle", 100).uniqueIndex()
+    val stageName = varchar("stage_name", 255).nullable()
+    val aliases = array<String>("aliases").nullable()
+    val category = varchar("category", 50) // actor, director, producer
+    val subcategory = varchar("subcategory", 50).nullable()
+    val nationality = varchar("nationality", 100).nullable()
+    val birthYear = integer("birth_year").nullable()
+    val majorWorks = array<String>("major_works").nullable()
+    val awards = array<String>("awards").nullable()
+    val socialMedia = text("social_media").nullable() // JSON
+    val verificationLevel = varchar("verification_level", 20).default("protected")
+    val protectionReason = text("protection_reason").nullable()
+    val addedBy = varchar("added_by", 100).nullable()
+    val verifiedDate = timestamp("verified_date").nullable()
+    val createdAt = timestamp("created_at").default(Instant.now())
+    val updatedAt = timestamp("updated_at").default(Instant.now())
+}
+
+// Music Celebrities
+object MusicCelebritiesTable : UUIDTable("protected_music_celebrities") {
+    val fullName = varchar("full_name", 255)
+    val handle = varchar("handle", 100).uniqueIndex()
+    val stageName = varchar("stage_name", 255).nullable()
+    val bandName = varchar("band_name", 255).nullable()
+    val aliases = array<String>("aliases").nullable()
+    val category = varchar("category", 50) // singer, rapper, producer
+    val genre = varchar("genre", 100).nullable()
+    val nationality = varchar("nationality", 100).nullable()
+    val birthYear = integer("birth_year").nullable()
+    val recordLabel = varchar("record_label", 200).nullable()
+    val majorAlbums = array<String>("major_albums").nullable()
+    val awards = array<String>("awards").nullable()
+    val socialMedia = text("social_media").nullable() // JSON
+    val monthlyListeners = integer("monthly_listeners").nullable()
+    val verificationLevel = varchar("verification_level", 20).default("protected")
+    val protectionReason = text("protection_reason").nullable()
+    val addedBy = varchar("added_by", 100).nullable()
+    val verifiedDate = timestamp("verified_date").nullable()
+    val createdAt = timestamp("created_at").default(Instant.now())
+    val updatedAt = timestamp("updated_at").default(Instant.now())
+}
+
+// Sports Figures
+object SportsFiguresTable : UUIDTable("protected_sports_figures") {
+    val fullName = varchar("full_name", 255)
+    val handle = varchar("handle", 100).uniqueIndex()
+    val nickname = varchar("nickname", 255).nullable()
+    val aliases = array<String>("aliases").nullable()
+    val category = varchar("category", 50) // athlete, coach, commentator
+    val sport = varchar("sport", 100)
+    val position = varchar("position", 100).nullable()
+    val teamCurrent = varchar("team_current", 200).nullable()
+    val teamHistory = array<String>("team_history").nullable()
+    val nationality = varchar("nationality", 100).nullable()
+    val birthYear = integer("birth_year").nullable()
+    val majorAchievements = array<String>("major_achievements").nullable()
+    val socialMedia = text("social_media").nullable() // JSON
+    val endorsements = array<String>("endorsements").nullable()
+    val verificationLevel = varchar("verification_level", 20).default("protected")
+    val protectionReason = text("protection_reason").nullable()
+    val addedBy = varchar("added_by", 100).nullable()
+    val verifiedDate = timestamp("verified_date").nullable()
+    val createdAt = timestamp("created_at").default(Instant.now())
+    val updatedAt = timestamp("updated_at").default(Instant.now())
+}
+
+// Digital Celebrities
+object DigitalCelebritiesTable : UUIDTable("protected_digital_celebrities") {
+    val fullName = varchar("full_name", 255)
+    val handle = varchar("handle", 100).uniqueIndex()
+    val screenName = varchar("screen_name", 255).nullable()
+    val aliases = array<String>("aliases").nullable()
+    val category = varchar("category", 50) // youtuber, tiktoker, streamer
+    val niche = varchar("niche", 100).nullable()
+    val nationality = varchar("nationality", 100).nullable()
+    val birthYear = integer("birth_year").nullable()
+    val primaryPlatform = varchar("primary_platform", 50).nullable()
+    val followerCounts = text("follower_counts").nullable() // JSON
+    val verifiedPlatforms = array<String>("verified_platforms").nullable()
+    val majorContent = array<String>("major_content").nullable()
+    val socialMedia = text("social_media").nullable() // JSON
+    val verificationLevel = varchar("verification_level", 20).default("protected")
+    val protectionReason = text("protection_reason").nullable()
+    val addedBy = varchar("added_by", 100).nullable()
+    val verifiedDate = timestamp("verified_date").nullable()
+    val createdAt = timestamp("created_at").default(Instant.now())
+    val updatedAt = timestamp("updated_at").default(Instant.now())
+}
+
+// Political Figures
+object PoliticalFiguresTable : UUIDTable("protected_political_figures") {
+    val fullName = varchar("full_name", 255)
+    val handle = varchar("handle", 100).uniqueIndex()
+    val title = varchar("title", 200).nullable()
+    val aliases = array<String>("aliases").nullable()
+    val category = varchar("category", 50) // head_of_state, legislator, judge
+    val country = varchar("country", 100)
+    val politicalParty = varchar("political_party", 200).nullable()
+    val officeCurrent = varchar("office_current", 300).nullable()
+    val officeHistory = array<String>("office_history").nullable()
+    val birthYear = integer("birth_year").nullable()
+    val majorPolicies = array<String>("major_policies").nullable()
+    val socialMedia = text("social_media").nullable() // JSON
+    val officialWebsites = array<String>("official_websites").nullable()
+    val verificationLevel = varchar("verification_level", 20).default("protected")
+    val protectionReason = text("protection_reason").nullable()
+    val addedBy = varchar("added_by", 100).nullable()
+    val verifiedDate = timestamp("verified_date").nullable()
+    val createdAt = timestamp("created_at").default(Instant.now())
+    val updatedAt = timestamp("updated_at").default(Instant.now())
+}
+
+// Government Organizations
+object GovernmentOrganizationsTable : UUIDTable("protected_government_organizations") {
+    val organizationName = varchar("organization_name", 255)
+    val handle = varchar("handle", 100).uniqueIndex()
+    val acronym = varchar("acronym", 50).nullable()
+    val aliases = array<String>("aliases").nullable()
+    val category = varchar("category", 50) // federal_agency, state_agency
+    val country = varchar("country", 100)
+    val department = varchar("department", 200).nullable()
+    val jurisdiction = varchar("jurisdiction", 100).nullable()
+    val headOfAgency = varchar("head_of_agency", 255).nullable()
+    val officialWebsites = array<String>("official_websites").nullable()
+    val socialMedia = text("social_media").nullable() // JSON
+    val verificationLevel = varchar("verification_level", 20).default("protected")
+    val protectionReason = text("protection_reason").nullable()
+    val addedBy = varchar("added_by", 100).nullable()
+    val verifiedDate = timestamp("verified_date").nullable()
+    val createdAt = timestamp("created_at").default(Instant.now())
+    val updatedAt = timestamp("updated_at").default(Instant.now())
+}
+
+// Corporations
+object CorporationsTable : UUIDTable("protected_corporations") {
+    val companyName = varchar("company_name", 255)
+    val handle = varchar("handle", 100).uniqueIndex()
+    val legalName = varchar("legal_name", 255).nullable()
+    val aliases = array<String>("aliases").nullable()
+    val category = varchar("category", 50) // technology, finance, retail
+    val industry = varchar("industry", 100).nullable()
+    val stockSymbol = varchar("stock_symbol", 10).nullable()
+    val marketCapBillions = decimal("market_cap_billions", 10, 2).nullable()
+    val foundedYear = integer("founded_year").nullable()
+    val headquartersCountry = varchar("headquarters_country", 100).nullable()
+    val headquartersCity = varchar("headquarters_city", 100).nullable()
+    val ceoName = varchar("ceo_name", 255).nullable()
+    val majorBrands = array<String>("major_brands").nullable()
+    val subsidiaries = array<String>("subsidiaries").nullable()
+    val officialWebsites = array<String>("official_websites").nullable()
+    val socialMedia = text("social_media").nullable() // JSON
+    val fortune500Rank = integer("fortune_500_rank").nullable()
+    val verificationLevel = varchar("verification_level", 20).default("protected")
+    val protectionReason = text("protection_reason").nullable()
+    val addedBy = varchar("added_by", 100).nullable()
+    val verifiedDate = timestamp("verified_date").nullable()
+    val createdAt = timestamp("created_at").default(Instant.now())
+    val updatedAt = timestamp("updated_at").default(Instant.now())
+}
+
+// Business Leaders
+object BusinessLeadersTable : UUIDTable("protected_business_leaders") {
+    val fullName = varchar("full_name", 255)
+    val handle = varchar("handle", 100).uniqueIndex()
+    val aliases = array<String>("aliases").nullable()
+    val category = varchar("category", 50) // ceo, founder, investor
+    val companyCurrent = varchar("company_current", 255).nullable()
+    val companyHistory = array<String>("company_history").nullable()
+    val title = varchar("title", 200).nullable()
+    val nationality = varchar("nationality", 100).nullable()
+    val birthYear = integer("birth_year").nullable()
+    val netWorthBillions = decimal("net_worth_billions", 10, 2).nullable()
+    val majorAchievements = array<String>("major_achievements").nullable()
+    val companiesFounded = array<String>("companies_founded").nullable()
+    val investments = array<String>("investments").nullable()
+    val socialMedia = text("social_media").nullable() // JSON
+    val forbesRanking = integer("forbes_ranking").nullable()
+    val verificationLevel = varchar("verification_level", 20).default("protected")
+    val protectionReason = text("protection_reason").nullable()
+    val addedBy = varchar("added_by", 100).nullable()
+    val verifiedDate = timestamp("verified_date").nullable()
+    val createdAt = timestamp("created_at").default(Instant.now())
+    val updatedAt = timestamp("updated_at").default(Instant.now())
+}
+
+// Financial Institutions
+object FinancialInstitutionsTable : UUIDTable("protected_financial_institutions") {
+    val institutionName = varchar("institution_name", 255)
+    val handle = varchar("handle", 100).uniqueIndex()
+    val legalName = varchar("legal_name", 255).nullable()
+    val aliases = array<String>("aliases").nullable()
+    val category = varchar("category", 50) // bank, credit_union, investment_firm
+    val institutionType = varchar("institution_type", 100).nullable()
+    val country = varchar("country", 100)
+    val assetsBillions = decimal("assets_billions", 15, 2).nullable()
+    val foundedYear = integer("founded_year").nullable()
+    val regulatoryStatus = array<String>("regulatory_status").nullable()
+    val majorServices = array<String>("major_services").nullable()
+    val subsidiaries = array<String>("subsidiaries").nullable()
+    val officialWebsites = array<String>("official_websites").nullable()
+    val socialMedia = text("social_media").nullable() // JSON
+    val verificationLevel = varchar("verification_level", 20).default("protected")
+    val protectionReason = text("protection_reason").nullable()
+    val addedBy = varchar("added_by", 100).nullable()
+    val verifiedDate = timestamp("verified_date").nullable()
+    val createdAt = timestamp("created_at").default(Instant.now())
+    val updatedAt = timestamp("updated_at").default(Instant.now())
+}
+
+// Tech Companies
+object TechCompaniesTable : UUIDTable("protected_tech_companies") {
+    val companyName = varchar("company_name", 255)
+    val handle = varchar("handle", 100).uniqueIndex()
+    val aliases = array<String>("aliases").nullable()
+    val category = varchar("category", 50) // saas, fintech, biotech
+    val businessModel = varchar("business_model", 100).nullable()
+    val valuationBillions = decimal("valuation_billions", 10, 2).nullable()
+    val foundedYear = integer("founded_year").nullable()
+    val headquartersCountry = varchar("headquarters_country", 100).nullable()
+    val fundingStage = varchar("funding_stage", 50).nullable()
+    val majorInvestors = array<String>("major_investors").nullable()
+    val keyProducts = array<String>("key_products").nullable()
+    val founders = array<String>("founders").nullable()
+    val officialWebsites = array<String>("official_websites").nullable()
+    val socialMedia = text("social_media").nullable() // JSON
+    val verificationLevel = varchar("verification_level", 20).default("protected")
+    val protectionReason = text("protection_reason").nullable()
+    val addedBy = varchar("added_by", 100).nullable()
+    val verifiedDate = timestamp("verified_date").nullable()
+    val createdAt = timestamp("created_at").default(Instant.now())
+    val updatedAt = timestamp("updated_at").default(Instant.now())
+}
+
+// Media Organizations
+object MediaOrganizationsTable : UUIDTable("protected_media_organizations") {
+    val organizationName = varchar("organization_name", 255)
+    val handle = varchar("handle", 100).uniqueIndex()
+    val aliases = array<String>("aliases").nullable()
+    val category = varchar("category", 50) // newspaper, tv_network, radio
+    val mediaType = varchar("media_type", 100).nullable()
+    val country = varchar("country", 100)
+    val foundedYear = integer("founded_year").nullable()
+    val circulation = integer("circulation").nullable()
+    val viewership = integer("viewership").nullable()
+    val parentCompany = varchar("parent_company", 255).nullable()
+    val majorShows = array<String>("major_shows").nullable()
+    val notableJournalists = array<String>("notable_journalists").nullable()
+    val officialWebsites = array<String>("official_websites").nullable()
+    val socialMedia = text("social_media").nullable() // JSON
+    val pressFreedomRating = varchar("press_freedom_rating", 50).nullable()
+    val verificationLevel = varchar("verification_level", 20).default("protected")
+    val protectionReason = text("protection_reason").nullable()
+    val addedBy = varchar("added_by", 100).nullable()
+    val verifiedDate = timestamp("verified_date").nullable()
+    val createdAt = timestamp("created_at").default(Instant.now())
+    val updatedAt = timestamp("updated_at").default(Instant.now())
+}
+
+// Journalists
+object JournalistsTable : UUIDTable("protected_journalists") {
+    val fullName = varchar("full_name", 255)
+    val handle = varchar("handle", 100).uniqueIndex()
+    val aliases = array<String>("aliases").nullable()
+    val category = varchar("category", 50) // reporter, anchor, columnist
+    val beat = varchar("beat", 100).nullable()
+    val currentEmployer = varchar("current_employer", 255).nullable()
+    val employerHistory = array<String>("employer_history").nullable()
+    val nationality = varchar("nationality", 100).nullable()
+    val birthYear = integer("birth_year").nullable()
+    val majorStories = array<String>("major_stories").nullable()
+    val awards = array<String>("awards").nullable()
+    val booksAuthored = array<String>("books_authored").nullable()
+    val socialMedia = text("social_media").nullable() // JSON
+    val verificationLevel = varchar("verification_level", 20).default("protected")
+    val protectionReason = text("protection_reason").nullable()
+    val addedBy = varchar("added_by", 100).nullable()
+    val verifiedDate = timestamp("verified_date").nullable()
+    val createdAt = timestamp("created_at").default(Instant.now())
+    val updatedAt = timestamp("updated_at").default(Instant.now())
+}
+
+// Scientists
+object ScientistsTable : UUIDTable("protected_scientists") {
+    val fullName = varchar("full_name", 255)
+    val handle = varchar("handle", 100).uniqueIndex()
+    val aliases = array<String>("aliases").nullable()
+    val category = varchar("category", 50) // physicist, chemist, biologist
+    val fieldOfStudy = varchar("field_of_study", 200).nullable()
+    val currentInstitution = varchar("current_institution", 255).nullable()
+    val institutionHistory = array<String>("institution_history").nullable()
+    val nationality = varchar("nationality", 100).nullable()
+    val birthYear = integer("birth_year").nullable()
+    val nobelPrizeYear = integer("nobel_prize_year").nullable()
+    val nobelCategory = varchar("nobel_category", 100).nullable()
+    val majorDiscoveries = array<String>("major_discoveries").nullable()
+    val publicationsNotable = array<String>("publications_notable").nullable()
+    val awards = array<String>("awards").nullable()
+    val socialMedia = text("social_media").nullable() // JSON
+    val hIndex = integer("h_index").nullable()
+    val verificationLevel = varchar("verification_level", 20).default("protected")
+    val protectionReason = text("protection_reason").nullable()
+    val addedBy = varchar("added_by", 100).nullable()
+    val verifiedDate = timestamp("verified_date").nullable()
+    val createdAt = timestamp("created_at").default(Instant.now())
+    val updatedAt = timestamp("updated_at").default(Instant.now())
+}
+
+// Academic Institutions
+object AcademicInstitutionsTable : UUIDTable("protected_academic_institutions") {
+    val institutionName = varchar("institution_name", 255)
+    val handle = varchar("handle", 100).uniqueIndex()
+    val aliases = array<String>("aliases").nullable()
+    val category = varchar("category", 50) // university, college, research_institute
+    val institutionType = varchar("institution_type", 100).nullable()
+    val country = varchar("country", 100)
+    val foundedYear = integer("founded_year").nullable()
+    val studentPopulation = integer("student_population").nullable()
+    val endowmentBillions = decimal("endowment_billions", 10, 2).nullable()
+    val rankingUs = integer("ranking_us").nullable()
+    val rankingWorld = integer("ranking_world").nullable()
+    val notableAlumni = array<String>("notable_alumni").nullable()
+    val majorPrograms = array<String>("major_programs").nullable()
+    val researchAreas = array<String>("research_areas").nullable()
+    val officialWebsites = array<String>("official_websites").nullable()
+    val socialMedia = text("social_media").nullable() // JSON
+    val verificationLevel = varchar("verification_level", 20).default("protected")
+    val protectionReason = text("protection_reason").nullable()
+    val addedBy = varchar("added_by", 100).nullable()
+    val verifiedDate = timestamp("verified_date").nullable()
+    val createdAt = timestamp("created_at").default(Instant.now())
+    val updatedAt = timestamp("updated_at").default(Instant.now())
+}
