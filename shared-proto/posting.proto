@@ -1,0 +1,200 @@
+syntax = "proto3";
+
+package entativa.posting;
+
+option java_package = "com.entativa.posting.proto";
+option java_outer_classname = "PostingProto";
+
+// Cross-platform content types
+enum ContentType {
+  TEXT = 0;
+  IMAGE = 1;
+  VIDEO = 2;
+  AUDIO = 3;
+  LINK = 4;
+  POLL = 5;
+  STORY = 6;
+  LIVE_STREAM = 7;
+}
+
+// Platform-specific post types
+enum PostType {
+  SONET_POST = 0;        // Facebook-like post
+  GALA_POST = 1;         // Instagram-like post
+  GALA_STORY = 2;        // Instagram story
+  PIKA_YEET = 3;         // Threads-like yeet
+  PIKA_REPLY = 4;        // Reply to yeet
+  PLAYPODS_VIDEO = 5;    // YouTube-like video
+  PLAYPODS_PIXEL = 6;    // YouTube Shorts-like
+}
+
+// Privacy settings
+enum PrivacyLevel {
+  PUBLIC = 0;
+  FRIENDS = 1;
+  PRIVATE = 2;
+  CUSTOM = 3;
+}
+
+// Media metadata
+message MediaMetadata {
+  string url = 1;
+  string thumbnail_url = 2;
+  int64 size_bytes = 3;
+  string mime_type = 4;
+  int32 width = 5;
+  int32 height = 6;
+  int32 duration_seconds = 7;
+  string alt_text = 8;
+  repeated string tags = 9;
+}
+
+// Location data
+message Location {
+  double latitude = 1;
+  double longitude = 2;
+  string name = 3;
+  string address = 4;
+  string place_id = 5;
+}
+
+// Cross-platform post request
+message CreatePostRequest {
+  string user_id = 1;
+  PostType post_type = 2;
+  ContentType content_type = 3;
+  string content = 4;
+  repeated MediaMetadata media = 5;
+  PrivacyLevel privacy = 6;
+  Location location = 7;
+  repeated string hashtags = 8;
+  repeated string mentions = 9;
+  string parent_post_id = 10;  // For replies/comments
+  map<string, string> platform_specific_data = 11;
+  int64 scheduled_at = 12;  // Unix timestamp
+  bool cross_post_enabled = 13;
+  repeated PostType cross_post_platforms = 14;
+}
+
+// Post response
+message Post {
+  string id = 1;
+  string user_id = 2;
+  PostType post_type = 3;
+  ContentType content_type = 4;
+  string content = 5;
+  repeated MediaMetadata media = 6;
+  PrivacyLevel privacy = 7;
+  Location location = 8;
+  repeated string hashtags = 9;
+  repeated string mentions = 10;
+  string parent_post_id = 11;
+  int64 created_at = 12;
+  int64 updated_at = 13;
+  int64 like_count = 14;
+  int64 comment_count = 15;
+  int64 share_count = 16;
+  int64 view_count = 17;
+  bool is_deleted = 18;
+  bool is_edited = 19;
+  map<string, string> platform_specific_data = 20;
+}
+
+// Cross-platform posting service
+service PostingService {
+  // Create a post on specific platform
+  rpc CreatePost(CreatePostRequest) returns (Post);
+  
+  // Get post by ID
+  rpc GetPost(GetPostRequest) returns (Post);
+  
+  // Update existing post
+  rpc UpdatePost(UpdatePostRequest) returns (Post);
+  
+  // Delete post
+  rpc DeletePost(DeletePostRequest) returns (DeletePostResponse);
+  
+  // Get user's posts across platforms
+  rpc GetUserPosts(GetUserPostsRequest) returns (GetUserPostsResponse);
+  
+  // Cross-post to multiple platforms
+  rpc CrossPost(CrossPostRequest) returns (CrossPostResponse);
+  
+  // Get post analytics
+  rpc GetPostAnalytics(GetPostAnalyticsRequest) returns (PostAnalytics);
+}
+
+message GetPostRequest {
+  string post_id = 1;
+  PostType platform = 2;
+}
+
+message UpdatePostRequest {
+  string post_id = 1;
+  PostType platform = 2;
+  string content = 3;
+  PrivacyLevel privacy = 4;
+  repeated string hashtags = 5;
+  Location location = 6;
+}
+
+message DeletePostRequest {
+  string post_id = 1;
+  PostType platform = 2;
+  string user_id = 3;
+}
+
+message DeletePostResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message GetUserPostsRequest {
+  string user_id = 1;
+  repeated PostType platforms = 2;
+  int32 limit = 3;
+  int32 offset = 4;
+  int64 since = 5;
+  int64 until = 6;
+}
+
+message GetUserPostsResponse {
+  repeated Post posts = 1;
+  bool has_more = 2;
+  string next_cursor = 3;
+}
+
+message CrossPostRequest {
+  CreatePostRequest base_post = 1;
+  repeated PostType target_platforms = 2;
+  map<string, string> platform_customizations = 3;
+}
+
+message CrossPostResponse {
+  repeated Post created_posts = 1;
+  repeated string failed_platforms = 2;
+  map<string, string> errors = 3;
+}
+
+message GetPostAnalyticsRequest {
+  string post_id = 1;
+  PostType platform = 2;
+  int64 from_date = 3;
+  int64 to_date = 4;
+}
+
+message PostAnalytics {
+  string post_id = 1;
+  int64 impressions = 2;
+  int64 reach = 3;
+  int64 engagement_rate = 4;
+  int64 click_through_rate = 5;
+  map<string, int64> demographic_data = 6;
+  repeated TimeSeriesData time_series = 7;
+}
+
+message TimeSeriesData {
+  int64 timestamp = 1;
+  int64 value = 2;
+  string metric = 3;
+}
