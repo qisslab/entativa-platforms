@@ -1,0 +1,330 @@
+# Entativa Platforms - Comprehensive .gitignore
+# Built with precision for enterprise-grade development
+
+# ===== BUILD OUTPUTS =====
+**/build/
+**/target/
+**/out/
+**/bin/
+**/dist/
+**/generated/
+**/classes/
+
+# ===== IDE FILES =====
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+.idea_modules/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Eclipse
+.project
+.classpath
+.settings/
+.metadata/
+
+# NetBeans
+nbproject/
+nbbuild/
+nbdist/
+.nb-gradle/
+
+# ===== LANGUAGE SPECIFIC =====
+# Kotlin/Java
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+replay_pid*
+
+# Gradle
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# Maven
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Python (for algorithm engine)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.env
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Node.js (for any frontend tooling)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+.next/
+.nuxt/
+
+# ===== DATABASES =====
+# PostgreSQL
+*.sql.backup
+*.sql.dump
+pg_data/
+postgres_data/
+
+# MongoDB
+mongo_data/
+mongodb_data/
+
+# Redis
+redis_data/
+dump.rdb
+appendonly.aof
+
+# Cassandra
+cassandra_data/
+commitlog/
+data/
+saved_caches/
+
+# Elasticsearch
+elasticsearch_data/
+es_data/
+
+# ===== CONFIGURATION & SECRETS =====
+# Environment files
+.env
+.env.local
+.env.development
+.env.staging
+.env.production
+.env.*.local
+
+# Configuration files with secrets
+**/application-local.yml
+**/application-secret.yml
+**/application-dev.yml
+**/config/local/
+**/config/secret/
+
+# Database URLs and connection strings
+database.properties
+jdbc.properties
+**/db-config.properties
+
+# API Keys and certificates
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+api-keys.properties
+secrets.properties
+
+# ===== DOCKER & CONTAINERS =====
+# Docker
+.dockerignore
+docker-compose.override.yml
+docker-compose.*.yml
+!docker-compose.yml
+!docker-compose.dev.yml
+!docker-compose.prod.yml
+
+# Container data
+**/docker/data/
+**/volumes/
+
+# ===== KUBERNETES =====
+# Helm
+**/charts/*.tgz
+**/charts/*/charts/
+**/charts/*/requirements.lock
+
+# K8s secrets
+**/k8s/secrets/
+**/k8s/*/secrets/
+
+# ===== MEDIA & UPLOADS =====
+# Uploaded media files
+**/uploads/
+**/media/
+**/static/uploads/
+**/public/uploads/
+
+# Generated thumbnails
+**/thumbnails/
+**/processed/
+
+# Video processing temp files
+**/temp/
+**/tmp/
+**/processing/
+
+# ===== LOGS =====
+# Application logs
+**/logs/
+**/*.log
+**/*.log.*
+logs/
+*.log
+*.log.gz
+*.log.zip
+
+# Specific log files
+error.log
+access.log
+application.log
+debug.log
+catalina.out
+spring.log
+
+# ===== MONITORING & METRICS =====
+# Prometheus
+prometheus_data/
+alertmanager_data/
+
+# Grafana
+grafana_data/
+
+# Jaeger
+jaeger_data/
+
+# ===== TESTING =====
+# Test outputs
+**/test-results/
+**/test-reports/
+**/coverage/
+.nyc_output/
+htmlcov/
+.coverage
+.pytest_cache/
+junit.xml
+**/surefire-reports/
+
+# ===== CACHE & TEMPORARY =====
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Cache directories
+.cache/
+**/cache/
+.parcel-cache/
+
+# ===== gRPC GENERATED =====
+# Generated proto files (we'll regenerate these)
+**/generated/proto/
+**/src/main/java/com/entativa/*/proto/
+**/src/main/kotlin/com/entativa/*/proto/
+**/proto_gen/
+**/*_pb2.py
+**/*_pb2_grpc.py
+**/*.pb.go
+
+# ===== TERRAFORM & INFRASTRUCTURE =====
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+.terraform.lock.hcl
+
+# Pulumi
+**/Pulumi.*.yaml
+**/.pulumi/
+
+# ===== BACKUP & ARCHIVES =====
+*.zip
+*.tar.gz
+*.rar
+*.7z
+backup/
+backups/
+*.backup
+*.bak
+
+# ===== RUNTIME =====
+# Process IDs
+*.pid
+
+# Memory dumps
+*.hprof
+*.dump
+core.*
+
+# ===== SPECIFIC TOOLS =====
+# SonarQube
+.sonar/
+.scannerwork/
+
+# JProfiler
+*.jprofiler
+
+# YourKit
+*.snapshot
+
+# Mission Control
+*.jfr
+
+# ===== PLATFORM SPECIFIC =====
+# Entativa-specific ignores
+**/entativa-id/temp/
+**/entativa-algorithm/models/
+**/shared-proto/compiled/
+
+# Demo and example data
+**/demo-data/
+**/sample-uploads/
+**/test-media/
+
+# ===== DOCUMENTATION BUILDS =====
+docs/_build/
+docs/build/
+site/
+
+# ===== EDITOR TEMPS =====
+*.sublime-project
+*.sublime-workspace
+.vimrc.local
+
+# ===== END OF GITIGNORE =====
+# Total exclusions for enterprise-grade development
+# Covers all major languages, frameworks, and tools
+# Optimized for microservices architecture

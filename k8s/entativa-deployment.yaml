@@ -1,0 +1,1007 @@
+# Entativa Platforms - Kubernetes Deployment Configuration
+# Complete production-ready deployment with monitoring and scaling
+# 
+# @author Neo Qiss
+# @status Production-ready with auto-scaling and health checks
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: entativa
+  labels:
+    app.kubernetes.io/name: entativa
+    app.kubernetes.io/version: "1.0.0"
+
+---
+# ConfigMap for shared configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: entativa-config
+  namespace: entativa
+data:
+  # Database configuration
+  postgres-host: "postgres-service"
+  postgres-port: "5432"
+  postgres-database: "entativa_master"
+  redis-host: "redis-service"
+  redis-port: "6379"
+  mongodb-host: "mongodb-service"
+  mongodb-port: "27017"
+  mongodb-database: "entativa_analytics"
+  cassandra-host: "cassandra-service"
+  cassandra-port: "9042"
+  elasticsearch-host: "elasticsearch-service"
+  elasticsearch-port: "9200"
+  
+  # gRPC ports
+  sonet-grpc-port: "50051"
+  gala-grpc-port: "50052"
+  pika-grpc-port: "50053"
+  playpods-grpc-port: "50054"
+  entativa-id-grpc-port: "50055"
+  
+  # Monitoring
+  prometheus-enabled: "true"
+  jaeger-enabled: "true"
+  log-level: "INFO"
+
+---
+# Secret for sensitive configuration
+apiVersion: v1
+kind: Secret
+metadata:
+  name: entativa-secrets
+  namespace: entativa
+type: Opaque
+stringData:
+  postgres-username: "entativa_user"
+  postgres-password: "entativa_secure_password_2024"
+  redis-password: "entativa_redis_password_2024"
+  mongodb-username: "entativa_user"
+  mongodb-password: "entativa_mongo_password_2024"
+  jwt-secret: "entativa_jwt_super_secret_key_2024_production"
+
+---
+# PostgreSQL Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: entativa
+  labels:
+    app: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: entativa-config
+              key: postgres-database
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: entativa-secrets
+              key: postgres-username
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: entativa-secrets
+              key: postgres-password
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        - name: postgres-init
+          mountPath: /docker-entrypoint-initdb.d
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - entativa_user
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - entativa_user
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-pvc
+      - name: postgres-init
+        configMap:
+          name: postgres-init-config
+
+---
+# PostgreSQL Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  namespace: entativa
+spec:
+  selector:
+    app: postgres
+  ports:
+  - port: 5432
+    targetPort: 5432
+  type: ClusterIP
+
+---
+# Redis Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: entativa
+  labels:
+    app: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+        command: ["redis-server"]
+        args: ["--requirepass", "$(REDIS_PASSWORD)", "--maxmemory", "1gb", "--maxmemory-policy", "allkeys-lru"]
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: entativa-secrets
+              key: redis-password
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "125m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          exec:
+            command:
+            - redis-cli
+            - ping
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - redis-cli
+            - ping
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+---
+# Redis Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  namespace: entativa
+spec:
+  selector:
+    app: redis
+  ports:
+  - port: 6379
+    targetPort: 6379
+  type: ClusterIP
+
+---
+# MongoDB Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+  namespace: entativa
+  labels:
+    app: mongodb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:7
+        ports:
+        - containerPort: 27017
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: entativa-secrets
+              key: mongodb-username
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: entativa-secrets
+              key: mongodb-password
+        - name: MONGO_INITDB_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: entativa-config
+              key: mongodb-database
+        volumeMounts:
+        - name: mongodb-storage
+          mountPath: /data/db
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          exec:
+            command:
+            - mongosh
+            - --eval
+            - "db.runCommand('ping')"
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - mongosh
+            - --eval
+            - "db.runCommand('ping')"
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: mongodb-storage
+        persistentVolumeClaim:
+          claimName: mongodb-pvc
+
+---
+# MongoDB Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-service
+  namespace: entativa
+spec:
+  selector:
+    app: mongodb
+  ports:
+  - port: 27017
+    targetPort: 27017
+  type: ClusterIP
+
+---
+# Cassandra StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cassandra
+  namespace: entativa
+  labels:
+    app: cassandra
+spec:
+  serviceName: cassandra-service
+  replicas: 3
+  selector:
+    matchLabels:
+      app: cassandra
+  template:
+    metadata:
+      labels:
+        app: cassandra
+    spec:
+      containers:
+      - name: cassandra
+        image: cassandra:4.1
+        ports:
+        - containerPort: 9042
+        - containerPort: 7000
+        - containerPort: 7001
+        env:
+        - name: CASSANDRA_SEEDS
+          value: "cassandra-0.cassandra-service.entativa.svc.cluster.local"
+        - name: CASSANDRA_CLUSTER_NAME
+          value: "Entativa Cluster"
+        - name: CASSANDRA_DC
+          value: "datacenter1"
+        - name: CASSANDRA_RACK
+          value: "rack1"
+        - name: CASSANDRA_ENDPOINT_SNITCH
+          value: "GossipingPropertyFileSnitch"
+        volumeMounts:
+        - name: cassandra-storage
+          mountPath: /var/lib/cassandra
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+        livenessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -c
+            - "nodetool status"
+          initialDelaySeconds: 90
+          periodSeconds: 30
+        readinessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -c
+            - "cqlsh -e 'describe keyspaces'"
+          initialDelaySeconds: 60
+          periodSeconds: 10
+  volumeClaimTemplates:
+  - metadata:
+      name: cassandra-storage
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 10Gi
+
+---
+# Cassandra Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: cassandra-service
+  namespace: entativa
+spec:
+  clusterIP: None
+  selector:
+    app: cassandra
+  ports:
+  - port: 9042
+    targetPort: 9042
+
+---
+# Elasticsearch Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch
+  namespace: entativa
+  labels:
+    app: elasticsearch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      containers:
+      - name: elasticsearch
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+        ports:
+        - containerPort: 9200
+        - containerPort: 9300
+        env:
+        - name: discovery.type
+          value: "single-node"
+        - name: ES_JAVA_OPTS
+          value: "-Xms1g -Xmx1g"
+        - name: xpack.security.enabled
+          value: "false"
+        volumeMounts:
+        - name: elasticsearch-storage
+          mountPath: /usr/share/elasticsearch/data
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "500m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+        livenessProbe:
+          httpGet:
+            path: /_cluster/health
+            port: 9200
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /_cluster/health
+            port: 9200
+          initialDelaySeconds: 30
+          periodSeconds: 10
+      volumes:
+      - name: elasticsearch-storage
+        persistentVolumeClaim:
+          claimName: elasticsearch-pvc
+
+---
+# Elasticsearch Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch-service
+  namespace: entativa
+spec:
+  selector:
+    app: elasticsearch
+  ports:
+  - port: 9200
+    targetPort: 9200
+  type: ClusterIP
+
+---
+# Sonet Backend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sonet-backend
+  namespace: entativa
+  labels:
+    app: sonet-backend
+    platform: sonet
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: sonet-backend
+  template:
+    metadata:
+      labels:
+        app: sonet-backend
+        platform: sonet
+    spec:
+      containers:
+      - name: sonet-backend
+        image: entativa/sonet-backend:latest
+        ports:
+        - containerPort: 50051
+        env:
+        - name: PLATFORM
+          value: "sonet"
+        - name: GRPC_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: entativa-config
+              key: sonet-grpc-port
+        - name: POSTGRES_URL
+          value: "jdbc:postgresql://$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DATABASE)"
+        - name: POSTGRES_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: entativa-config
+              key: postgres-host
+        - name: POSTGRES_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: entativa-config
+              key: postgres-port
+        - name: POSTGRES_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: entativa-config
+              key: postgres-database
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: entativa-secrets
+              key: postgres-username
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: entativa-secrets
+              key: postgres-password
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: entativa-config
+              key: redis-host
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: entativa-secrets
+              key: redis-password
+        - name: MONGODB_CONNECTION_STRING
+          value: "mongodb://$(MONGODB_USERNAME):$(MONGODB_PASSWORD)@$(MONGODB_HOST):$(MONGODB_PORT)/$(MONGODB_DATABASE)"
+        - name: MONGODB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: entativa-config
+              key: mongodb-host
+        - name: MONGODB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: entativa-config
+              key: mongodb-port
+        - name: MONGODB_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: entativa-config
+              key: mongodb-database
+        - name: MONGODB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: entativa-secrets
+              key: mongodb-username
+        - name: MONGODB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: entativa-secrets
+              key: mongodb-password
+        - name: CASSANDRA_CONTACT_POINTS
+          valueFrom:
+            configMapKeyRef:
+              name: entativa-config
+              key: cassandra-host
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          tcpSocket:
+            port: 50051
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          tcpSocket:
+            port: 50051
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+# Sonet Backend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: sonet-backend-service
+  namespace: entativa
+spec:
+  selector:
+    app: sonet-backend
+  ports:
+  - port: 50051
+    targetPort: 50051
+  type: ClusterIP
+
+---
+# Sonet Backend HPA
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: sonet-backend-hpa
+  namespace: entativa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: sonet-backend
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+# Gala Backend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gala-backend
+  namespace: entativa
+  labels:
+    app: gala-backend
+    platform: gala
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: gala-backend
+  template:
+    metadata:
+      labels:
+        app: gala-backend
+        platform: gala
+    spec:
+      containers:
+      - name: gala-backend
+        image: entativa/gala-backend:latest
+        ports:
+        - containerPort: 50052
+        env:
+        - name: PLATFORM
+          value: "gala"
+        - name: GRPC_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: entativa-config
+              key: gala-grpc-port
+        # ... (same environment variables as sonet-backend)
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          tcpSocket:
+            port: 50052
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          tcpSocket:
+            port: 50052
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+# Gala Backend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: gala-backend-service
+  namespace: entativa
+spec:
+  selector:
+    app: gala-backend
+  ports:
+  - port: 50052
+    targetPort: 50052
+  type: ClusterIP
+
+---
+# Pika Backend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pika-backend
+  namespace: entativa
+  labels:
+    app: pika-backend
+    platform: pika
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: pika-backend
+  template:
+    metadata:
+      labels:
+        app: pika-backend
+        platform: pika
+    spec:
+      containers:
+      - name: pika-backend
+        image: entativa/pika-backend:latest
+        ports:
+        - containerPort: 50053
+        env:
+        - name: PLATFORM
+          value: "pika"
+        - name: GRPC_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: entativa-config
+              key: pika-grpc-port
+        # ... (same environment variables as sonet-backend)
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          tcpSocket:
+            port: 50053
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          tcpSocket:
+            port: 50053
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+# Pika Backend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: pika-backend-service
+  namespace: entativa
+spec:
+  selector:
+    app: pika-backend
+  ports:
+  - port: 50053
+    targetPort: 50053
+  type: ClusterIP
+
+---
+# PlayPods Backend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: playpods-backend
+  namespace: entativa
+  labels:
+    app: playpods-backend
+    platform: playpods
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: playpods-backend
+  template:
+    metadata:
+      labels:
+        app: playpods-backend
+        platform: playpods
+    spec:
+      containers:
+      - name: playpods-backend
+        image: entativa/playpods-backend:latest
+        ports:
+        - containerPort: 50054
+        env:
+        - name: PLATFORM
+          value: "playpods"
+        - name: GRPC_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: entativa-config
+              key: playpods-grpc-port
+        # ... (same environment variables as sonet-backend)
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          tcpSocket:
+            port: 50054
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          tcpSocket:
+            port: 50054
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+# PlayPods Backend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: playpods-backend-service
+  namespace: entativa
+spec:
+  selector:
+    app: playpods-backend
+  ports:
+  - port: 50054
+    targetPort: 50054
+  type: ClusterIP
+
+---
+# Entativa ID Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: entativa-id
+  namespace: entativa
+  labels:
+    app: entativa-id
+    platform: entativa-id
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: entativa-id
+  template:
+    metadata:
+      labels:
+        app: entativa-id
+        platform: entativa-id
+    spec:
+      containers:
+      - name: entativa-id
+        image: entativa/entativa-id:latest
+        ports:
+        - containerPort: 50055
+        env:
+        - name: PLATFORM
+          value: "entativa-id"
+        - name: GRPC_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: entativa-config
+              key: entativa-id-grpc-port
+        # ... (same environment variables as sonet-backend)
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          tcpSocket:
+            port: 50055
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          tcpSocket:
+            port: 50055
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+# Entativa ID Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: entativa-id-service
+  namespace: entativa
+spec:
+  selector:
+    app: entativa-id
+  ports:
+  - port: 50055
+    targetPort: 50055
+  type: ClusterIP
+
+---
+# API Gateway (Nginx-based)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: entativa
+  labels:
+    app: api-gateway
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: api-gateway-config
+
+---
+# API Gateway Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway-service
+  namespace: entativa
+spec:
+  selector:
+    app: api-gateway
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+  - name: https
+    port: 443
+    targetPort: 443
+  type: LoadBalancer
+
+---
+# PersistentVolumeClaims
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: entativa
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb-pvc
+  namespace: entativa
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: elasticsearch-pvc
+  namespace: entativa
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 30Gi

@@ -1,0 +1,677 @@
+syntax = "proto3";
+
+package entativa.grpc;
+
+option java_package = "com.entativa.grpc";
+option java_outer_classname = "EntativaProtos";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// ==================== USER SERVICE ====================
+
+service UserService {
+  // User management
+  rpc CreateUser(CreateUserRequest) returns (UserResponse);
+  rpc GetUser(GetUserRequest) returns (UserResponse);
+  rpc UpdateUser(UpdateUserRequest) returns (UserResponse);
+  rpc DeleteUser(DeleteUserRequest) returns (google.protobuf.Empty);
+  
+  // Authentication
+  rpc AuthenticateUser(AuthenticateUserRequest) returns (AuthenticationResponse);
+  rpc RefreshToken(RefreshTokenRequest) returns (AuthenticationResponse);
+  rpc LogoutUser(LogoutUserRequest) returns (google.protobuf.Empty);
+  
+  // Social features
+  rpc FollowUser(FollowUserRequest) returns (SocialActionResponse);
+  rpc UnfollowUser(UnfollowUserRequest) returns (SocialActionResponse);
+  rpc AddFriend(AddFriendRequest) returns (SocialActionResponse);
+  rpc RemoveFriend(RemoveFriendRequest) returns (SocialActionResponse);
+  rpc BlockUser(BlockUserRequest) returns (SocialActionResponse);
+  rpc UnblockUser(UnblockUserRequest) returns (SocialActionResponse);
+  
+  // Lists and relationships
+  rpc GetFollowers(GetFollowersRequest) returns (UserListResponse);
+  rpc GetFollowing(GetFollowingRequest) returns (UserListResponse);
+  rpc GetFriends(GetFriendsRequest) returns (UserListResponse);
+  rpc GetBlockedUsers(GetBlockedUsersRequest) returns (UserListResponse);
+  
+  // Search
+  rpc SearchUsers(SearchUsersRequest) returns (UserListResponse);
+}
+
+// ==================== POST SERVICE ====================
+
+service PostService {
+  // Post management
+  rpc CreatePost(CreatePostRequest) returns (PostResponse);
+  rpc GetPost(GetPostRequest) returns (PostResponse);
+  rpc UpdatePost(UpdatePostRequest) returns (PostResponse);
+  rpc DeletePost(DeletePostRequest) returns (google.protobuf.Empty);
+  
+  // Feed operations
+  rpc GetUserFeed(GetUserFeedRequest) returns (PostListResponse);
+  rpc GetUserPosts(GetUserPostsRequest) returns (PostListResponse);
+  rpc GetTrendingPosts(GetTrendingPostsRequest) returns (PostListResponse);
+  
+  // Interactions
+  rpc LikePost(LikePostRequest) returns (InteractionResponse);
+  rpc UnlikePost(UnlikePostRequest) returns (InteractionResponse);
+  rpc SharePost(SharePostRequest) returns (InteractionResponse);
+  rpc SavePost(SavePostRequest) returns (InteractionResponse);
+  rpc UnsavePost(UnsavePostRequest) returns (InteractionResponse);
+  
+  // Comments
+  rpc AddComment(AddCommentRequest) returns (CommentResponse);
+  rpc GetComments(GetCommentsRequest) returns (CommentListResponse);
+  rpc UpdateComment(UpdateCommentRequest) returns (CommentResponse);
+  rpc DeleteComment(DeleteCommentRequest) returns (google.protobuf.Empty);
+  
+  // Search
+  rpc SearchPosts(SearchPostsRequest) returns (PostListResponse);
+}
+
+// ==================== NOTIFICATION SERVICE ====================
+
+service NotificationService {
+  rpc GetNotifications(GetNotificationsRequest) returns (NotificationListResponse);
+  rpc MarkNotificationRead(MarkNotificationReadRequest) returns (google.protobuf.Empty);
+  rpc MarkAllNotificationsRead(MarkAllNotificationsReadRequest) returns (google.protobuf.Empty);
+  rpc DeleteNotification(DeleteNotificationRequest) returns (google.protobuf.Empty);
+  rpc GetNotificationSettings(GetNotificationSettingsRequest) returns (NotificationSettingsResponse);
+  rpc UpdateNotificationSettings(UpdateNotificationSettingsRequest) returns (NotificationSettingsResponse);
+}
+
+// ==================== ANALYTICS SERVICE ====================
+
+service AnalyticsService {
+  rpc TrackEvent(TrackEventRequest) returns (google.protobuf.Empty);
+  rpc GetUserAnalytics(GetUserAnalyticsRequest) returns (UserAnalyticsResponse);
+  rpc GetPostAnalytics(GetPostAnalyticsRequest) returns (PostAnalyticsResponse);
+  rpc GetPlatformMetrics(GetPlatformMetricsRequest) returns (PlatformMetricsResponse);
+  rpc GetTrendingContent(GetTrendingContentRequest) returns (TrendingContentResponse);
+}
+
+// ==================== MEDIA SERVICE ====================
+
+service MediaService {
+  rpc UploadMedia(stream UploadMediaRequest) returns (MediaUploadResponse);
+  rpc GetMedia(GetMediaRequest) returns (MediaResponse);
+  rpc DeleteMedia(DeleteMediaRequest) returns (google.protobuf.Empty);
+  rpc ProcessMedia(ProcessMediaRequest) returns (MediaProcessingResponse);
+}
+
+// ==================== MESSAGING SERVICE ====================
+
+service MessagingService {
+  // Direct messages
+  rpc SendMessage(SendMessageRequest) returns (MessageResponse);
+  rpc GetMessages(GetMessagesRequest) returns (MessageListResponse);
+  rpc GetConversations(GetConversationsRequest) returns (ConversationListResponse);
+  rpc DeleteMessage(DeleteMessageRequest) returns (google.protobuf.Empty);
+  
+  // Group chats (for platforms that support it)
+  rpc CreateGroupChat(CreateGroupChatRequest) returns (GroupChatResponse);
+  rpc AddToGroupChat(AddToGroupChatRequest) returns (google.protobuf.Empty);
+  rpc RemoveFromGroupChat(RemoveFromGroupChatRequest) returns (google.protobuf.Empty);
+  rpc LeaveGroupChat(LeaveGroupChatRequest) returns (google.protobuf.Empty);
+}
+
+// ==================== DATA MODELS ====================
+
+// Platform enum
+enum Platform {
+  PLATFORM_UNSPECIFIED = 0;
+  SONET = 1;
+  GALA = 2;
+  PIKA = 3;
+  PLAYPODS = 4;
+}
+
+// User messages
+message CreateUserRequest {
+  string username = 1;
+  string email = 2;
+  string password = 3;
+  string display_name = 4;
+  string bio = 5;
+  string profile_image_url = 6;
+  Platform platform = 7;
+  map<string, string> metadata = 8;
+}
+
+message GetUserRequest {
+  string user_id = 1;
+  Platform platform = 2;
+}
+
+message UpdateUserRequest {
+  string user_id = 1;
+  Platform platform = 2;
+  string display_name = 3;
+  string bio = 4;
+  string profile_image_url = 5;
+  map<string, string> metadata = 6;
+}
+
+message DeleteUserRequest {
+  string user_id = 1;
+  Platform platform = 2;
+}
+
+message UserResponse {
+  string user_id = 1;
+  string username = 2;
+  string email = 3;
+  string display_name = 4;
+  string bio = 5;
+  string profile_image_url = 6;
+  Platform platform = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+  UserStats stats = 10;
+  map<string, string> metadata = 11;
+}
+
+message UserStats {
+  int64 followers_count = 1;
+  int64 following_count = 2;
+  int64 friends_count = 3;
+  int64 posts_count = 4;
+  int64 likes_received = 5;
+}
+
+message AuthenticateUserRequest {
+  string username_or_email = 1;
+  string password = 2;
+  Platform platform = 3;
+}
+
+message RefreshTokenRequest {
+  string refresh_token = 1;
+  Platform platform = 2;
+}
+
+message LogoutUserRequest {
+  string user_id = 1;
+  string session_id = 2;
+  Platform platform = 3;
+}
+
+message AuthenticationResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+  google.protobuf.Timestamp expires_at = 3;
+  UserResponse user = 4;
+}
+
+// Social action messages
+message FollowUserRequest {
+  string user_id = 1;
+  string target_user_id = 2;
+  Platform platform = 3;
+}
+
+message UnfollowUserRequest {
+  string user_id = 1;
+  string target_user_id = 2;
+  Platform platform = 3;
+}
+
+message AddFriendRequest {
+  string user_id = 1;
+  string target_user_id = 2;
+  Platform platform = 3;
+}
+
+message RemoveFriendRequest {
+  string user_id = 1;
+  string target_user_id = 2;
+  Platform platform = 3;
+}
+
+message BlockUserRequest {
+  string user_id = 1;
+  string target_user_id = 2;
+  Platform platform = 3;
+}
+
+message UnblockUserRequest {
+  string user_id = 1;
+  string target_user_id = 2;
+  Platform platform = 3;
+}
+
+message SocialActionResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// List requests
+message GetFollowersRequest {
+  string user_id = 1;
+  Platform platform = 2;
+  int32 page = 3;
+  int32 limit = 4;
+}
+
+message GetFollowingRequest {
+  string user_id = 1;
+  Platform platform = 2;
+  int32 page = 3;
+  int32 limit = 4;
+}
+
+message GetFriendsRequest {
+  string user_id = 1;
+  Platform platform = 2;
+  int32 page = 3;
+  int32 limit = 4;
+}
+
+message GetBlockedUsersRequest {
+  string user_id = 1;
+  Platform platform = 2;
+  int32 page = 3;
+  int32 limit = 4;
+}
+
+message UserListResponse {
+  repeated UserResponse users = 1;
+  int32 total_count = 2;
+  int32 page = 3;
+  bool has_next = 4;
+}
+
+message SearchUsersRequest {
+  string query = 1;
+  Platform platform = 2;
+  int32 page = 3;
+  int32 limit = 4;
+}
+
+// Post messages
+message CreatePostRequest {
+  string user_id = 1;
+  Platform platform = 2;
+  string content = 3;
+  repeated string media_urls = 4;
+  repeated string tags = 5;
+  string location = 6;
+  PostVisibility visibility = 7;
+  map<string, string> metadata = 8;
+}
+
+message GetPostRequest {
+  string post_id = 1;
+  Platform platform = 2;
+  string requesting_user_id = 3;
+}
+
+message UpdatePostRequest {
+  string post_id = 1;
+  string user_id = 2;
+  Platform platform = 3;
+  string content = 4;
+  repeated string tags = 5;
+  PostVisibility visibility = 6;
+}
+
+message DeletePostRequest {
+  string post_id = 1;
+  string user_id = 2;
+  Platform platform = 3;
+}
+
+message PostResponse {
+  string post_id = 1;
+  string user_id = 2;
+  string author_username = 3;
+  string author_display_name = 4;
+  string author_profile_image = 5;
+  Platform platform = 6;
+  string content = 7;
+  repeated string media_urls = 8;
+  repeated string tags = 9;
+  string location = 10;
+  PostVisibility visibility = 11;
+  google.protobuf.Timestamp created_at = 12;
+  google.protobuf.Timestamp updated_at = 13;
+  PostStats stats = 14;
+  bool is_liked_by_user = 15;
+  bool is_saved_by_user = 16;
+  map<string, string> metadata = 17;
+}
+
+message PostStats {
+  int64 likes_count = 1;
+  int64 shares_count = 2;
+  int64 comments_count = 3;
+  int64 saves_count = 4;
+  int64 views_count = 5;
+}
+
+enum PostVisibility {
+  VISIBILITY_UNSPECIFIED = 0;
+  PUBLIC = 1;
+  FRIENDS_ONLY = 2;
+  PRIVATE = 3;
+  UNLISTED = 4;
+}
+
+// Feed messages
+message GetUserFeedRequest {
+  string user_id = 1;
+  Platform platform = 2;
+  int32 page = 3;
+  int32 limit = 4;
+  string last_post_id = 5;
+}
+
+message GetUserPostsRequest {
+  string user_id = 1;
+  string target_user_id = 2;
+  Platform platform = 3;
+  int32 page = 4;
+  int32 limit = 5;
+}
+
+message GetTrendingPostsRequest {
+  Platform platform = 1;
+  int32 limit = 2;
+  string time_range = 3; // "1h", "24h", "7d", "30d"
+}
+
+message PostListResponse {
+  repeated PostResponse posts = 1;
+  int32 total_count = 2;
+  int32 page = 3;
+  bool has_next = 4;
+  string next_cursor = 5;
+}
+
+// Interaction messages
+message LikePostRequest {
+  string user_id = 1;
+  string post_id = 2;
+  Platform platform = 3;
+}
+
+message UnlikePostRequest {
+  string user_id = 1;
+  string post_id = 2;
+  Platform platform = 3;
+}
+
+message SharePostRequest {
+  string user_id = 1;
+  string post_id = 2;
+  Platform platform = 3;
+  string comment = 4;
+}
+
+message SavePostRequest {
+  string user_id = 1;
+  string post_id = 2;
+  Platform platform = 3;
+}
+
+message UnsavePostRequest {
+  string user_id = 1;
+  string post_id = 2;
+  Platform platform = 3;
+}
+
+message InteractionResponse {
+  bool success = 1;
+  string message = 2;
+  int64 new_count = 3;
+}
+
+// Comment messages
+message AddCommentRequest {
+  string user_id = 1;
+  string post_id = 2;
+  Platform platform = 3;
+  string content = 4;
+  string parent_comment_id = 5; // For replies
+}
+
+message GetCommentsRequest {
+  string post_id = 1;
+  Platform platform = 2;
+  int32 page = 3;
+  int32 limit = 4;
+  string requesting_user_id = 5;
+}
+
+message UpdateCommentRequest {
+  string comment_id = 1;
+  string user_id = 2;
+  Platform platform = 3;
+  string content = 4;
+}
+
+message DeleteCommentRequest {
+  string comment_id = 1;
+  string user_id = 2;
+  Platform platform = 3;
+}
+
+message CommentResponse {
+  string comment_id = 1;
+  string post_id = 2;
+  string user_id = 3;
+  string author_username = 4;
+  string author_display_name = 5;
+  string author_profile_image = 6;
+  Platform platform = 7;
+  string content = 8;
+  string parent_comment_id = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+  CommentStats stats = 12;
+  bool is_liked_by_user = 13;
+}
+
+message CommentStats {
+  int64 likes_count = 1;
+  int64 replies_count = 2;
+}
+
+message CommentListResponse {
+  repeated CommentResponse comments = 1;
+  int32 total_count = 2;
+  int32 page = 3;
+  bool has_next = 4;
+}
+
+message SearchPostsRequest {
+  string query = 1;
+  Platform platform = 2;
+  int32 page = 3;
+  int32 limit = 4;
+  repeated string tags = 5;
+  string time_range = 6;
+}
+
+// Notification messages
+message GetNotificationsRequest {
+  string user_id = 1;
+  Platform platform = 2;
+  int32 page = 3;
+  int32 limit = 4;
+  bool unread_only = 5;
+}
+
+message MarkNotificationReadRequest {
+  string notification_id = 1;
+  string user_id = 2;
+  Platform platform = 3;
+}
+
+message MarkAllNotificationsReadRequest {
+  string user_id = 1;
+  Platform platform = 2;
+}
+
+message DeleteNotificationRequest {
+  string notification_id = 1;
+  string user_id = 2;
+  Platform platform = 3;
+}
+
+message NotificationResponse {
+  string notification_id = 1;
+  string user_id = 2;
+  Platform platform = 3;
+  NotificationType type = 4;
+  string title = 5;
+  string message = 6;
+  string from_user_id = 7;
+  string from_username = 8;
+  string content_id = 9;
+  bool is_read = 10;
+  google.protobuf.Timestamp created_at = 11;
+  map<string, string> metadata = 12;
+}
+
+enum NotificationType {
+  NOTIFICATION_UNSPECIFIED = 0;
+  LIKE = 1;
+  COMMENT = 2;
+  SHARE = 3;
+  FOLLOW = 4;
+  FRIEND_REQUEST = 5;
+  MENTION = 6;
+  MESSAGE = 7;
+  SYSTEM = 8;
+}
+
+message NotificationListResponse {
+  repeated NotificationResponse notifications = 1;
+  int32 total_count = 2;
+  int32 unread_count = 3;
+  int32 page = 4;
+  bool has_next = 5;
+}
+
+// Analytics messages
+message TrackEventRequest {
+  string user_id = 1;
+  Platform platform = 2;
+  string event_type = 3;
+  map<string, string> properties = 4;
+  google.protobuf.Timestamp timestamp = 5;
+}
+
+message GetUserAnalyticsRequest {
+  string user_id = 1;
+  Platform platform = 2;
+  string time_range = 3;
+}
+
+message UserAnalyticsResponse {
+  string user_id = 1;
+  Platform platform = 2;
+  int64 total_posts = 3;
+  int64 total_likes = 4;
+  int64 total_shares = 5;
+  int64 total_comments = 6;
+  int64 total_followers = 7;
+  int64 engagement_rate = 8;
+  repeated DailyMetric daily_metrics = 9;
+}
+
+message DailyMetric {
+  string date = 1;
+  int64 posts = 2;
+  int64 likes = 3;
+  int64 shares = 4;
+  int64 comments = 5;
+  int64 followers_gained = 6;
+}
+
+// Media messages
+message UploadMediaRequest {
+  oneof request {
+    MediaMetadata metadata = 1;
+    bytes chunk_data = 2;
+  }
+}
+
+message MediaMetadata {
+  string filename = 1;
+  string content_type = 2;
+  int64 file_size = 3;
+  string user_id = 4;
+  Platform platform = 5;
+}
+
+message MediaUploadResponse {
+  string media_id = 1;
+  string media_url = 2;
+  string thumbnail_url = 3;
+  MediaType media_type = 4;
+  bool success = 5;
+  string error_message = 6;
+}
+
+message GetMediaRequest {
+  string media_id = 1;
+  Platform platform = 2;
+}
+
+message MediaResponse {
+  string media_id = 1;
+  string media_url = 2;
+  string thumbnail_url = 3;
+  MediaType media_type = 4;
+  string filename = 5;
+  int64 file_size = 6;
+  google.protobuf.Timestamp created_at = 7;
+}
+
+enum MediaType {
+  MEDIA_UNSPECIFIED = 0;
+  IMAGE = 1;
+  VIDEO = 2;
+  AUDIO = 3;
+  DOCUMENT = 4;
+}
+
+// Messaging messages
+message SendMessageRequest {
+  string from_user_id = 1;
+  string to_user_id = 2;
+  Platform platform = 3;
+  string content = 4;
+  repeated string media_urls = 5;
+  MessageType message_type = 6;
+}
+
+message MessageResponse {
+  string message_id = 1;
+  string from_user_id = 2;
+  string to_user_id = 3;
+  Platform platform = 4;
+  string content = 5;
+  repeated string media_urls = 6;
+  MessageType message_type = 7;
+  bool is_read = 8;
+  google.protobuf.Timestamp created_at = 9;
+}
+
+enum MessageType {
+  MESSAGE_UNSPECIFIED = 0;
+  TEXT = 1;
+  MEDIA = 2;
+  SYSTEM = 3;
+}
+
+// Error messages
+message ErrorResponse {
+  int32 code = 1;
+  string message = 2;
+  map<string, string> details = 3;
+}
